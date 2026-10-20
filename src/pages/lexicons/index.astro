@@ -1,0 +1,40 @@
+---
+import { Code } from 'astro:components';
+import Page from '../../layouts/Page.astro';
+import { lexicons, lexiconHref } from '../../lib/lexicons';
+import shikiTheme from '../../lib/shiki-theme.mjs';
+
+const meta = [
+  { key: 'title', value: 'lexicons', big: true },
+  { key: 'subtitle', value: 'schemas published under agentid.at' },
+  { key: 'count', value: String(lexicons.length) },
+];
+const headings = [
+  { depth: 1, slug: 'lexicons', text: 'Lexicons' },
+  ...lexicons.map((lex) => ({ depth: 2, slug: lex.id, text: lex.id })),
+];
+---
+<Page title="lexicons — agentid.at" description="Lexicon schemas published under agentid.at" meta={meta} headings={headings}>
+  <h1 id="lexicons">Lexicons</h1>
+  <p>
+    These are the lexicon schemas in the <code>at.agentid.*</code> namespace. The JSON
+    files in the repo's <code>lexicons/</code> folder are the source of truth.
+    Each one is also served as raw JSON at <code>/lexicons/&lt;nsid&gt;.json</code>.
+  </p>
+
+  {lexicons.map((lex) => {
+    const main = lex.defs.main;
+    return (
+      <section>
+        <h2 id={lex.id}>{lex.id}</h2>
+        <p class="muted">
+          {main?.type ?? 'defs'}
+          {main?.key && <> · key <code>{String(main.key)}</code></>}
+          {' · '}<a href={lexiconHref(lex.id)}>raw json</a>
+        </p>
+        {(lex.description ?? main?.description) && <p>{lex.description ?? main?.description}</p>}
+        <Code code={JSON.stringify(lex, null, 2)} lang="json" theme={shikiTheme} />
+      </section>
+    );
+  })}
+</Page>

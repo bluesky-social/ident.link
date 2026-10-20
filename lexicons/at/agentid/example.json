@@ -1,0 +1,18 @@
+{
+  "lexicon": 1,
+  "id": "at.agentid.example",
+  "defs": {
+    "main": {
+      "type": "record",
+      "description": "Placeholder record.",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["createdAt"],
+        "properties": {
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    }
+  }
+}

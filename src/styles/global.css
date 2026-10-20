@@ -1,0 +1,242 @@
+:root {
+  color-scheme: light;
+  --paper: #FCFCFB;
+  --ink: #23282E;
+  --syntax: #A6AEB8;   /* markdown punctuation */
+  --muted: #697180;    /* secondary text */
+  --accent: #0B63D8;   /* links, json keys */
+  --green: #1A7F37;    /* strings in code */
+  --code-bg: #F3F4F1;
+  --code-inline-bg: #F3F4F1;
+  --rule: #E5E7E3;
+  --sel: #D4E4FA;
+  --header-bg: #FFFFFF;
+}
+html.dark {
+  color-scheme: dark;
+  --paper: #15181C;
+  --ink: #EDF1F6;
+  --syntax: #7A8694;
+  --muted: #B4BEC9;
+  --accent: #6CB3FF;
+  --green: #8FD9A8;
+  --code-bg: #20262D;
+  --code-inline-bg: #323C48;
+  --rule: #39414C;
+  --sel: #2F4F73;
+  --header-bg: #0C0F12;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "iA Writer Mono", "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  font-size: 15px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--sel); }
+
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- shared centering shell ---------- */
+.shell {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 80ch) 1fr;
+  column-gap: 48px;
+  padding: 0 32px;
+}
+.shell > .mid { grid-column: 2; }
+
+/* ---------- site header ---------- */
+header.site {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--rule);
+}
+header.site .mid {
+  display: flex;
+  align-items: baseline;
+  gap: 3ch;
+  padding: 16px 0;
+  font-size: 14px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+header.site .brand {
+  color: var(--ink);
+  margin-right: 1ch;
+  align-self: center;
+  display: inline-flex;
+}
+header.site .brand:hover { color: var(--accent); }
+header.site .brand .robot { display: block; }
+header.site nav { display: flex; gap: 2.5ch; }
+header.site nav a,
+header.site .ext a {
+  color: var(--muted);
+  text-decoration: none;
+}
+header.site nav a:hover,
+header.site .ext a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+header.site nav a.current { color: var(--ink); font-weight: 700; }
+header.site .ext { margin-left: auto; display: flex; gap: 2.5ch; align-items: baseline; }
+
+button.theme {
+  font: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+}
+button.theme .br { color: var(--syntax); }
+button.theme:hover { color: var(--accent); }
+button.theme:hover .label { text-decoration: underline; text-underline-offset: 3px; }
+button.theme:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- document + right TOC ---------- */
+.page { padding-top: 28px; padding-bottom: 96px; position: relative; }
+main { grid-column: 2; min-width: 0; }
+
+aside.toc {
+  grid-column: 3;
+  justify-self: start;
+  position: sticky;
+  top: 110px;
+  align-self: start;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 13px;
+  line-height: 2.0;
+}
+aside.toc ul { list-style: none; }
+aside.toc li { padding-left: 2ch; text-indent: -2ch; }
+aside.toc li::before { content: "- "; color: var(--syntax); }
+aside.toc a { color: var(--muted); text-decoration: none; }
+aside.toc a:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+aside.toc li.active a { color: var(--ink); font-weight: 700; }
+
+/* ---------- frontmatter hero ---------- */
+.frontmatter { margin-bottom: 44px; }
+.frontmatter .fence { color: var(--syntax); }
+.frontmatter table { border-collapse: collapse; }
+.frontmatter td { padding: 0; vertical-align: top; }
+.frontmatter td.k { color: var(--green); padding-right: 1ch; white-space: nowrap; }
+.frontmatter td.k::after { content: ":"; color: var(--syntax); }
+.frontmatter td.v { color: var(--ink); }
+.frontmatter .big { font-weight: 700; }
+
+/* ---------- markdown typography ----------
+   Rendered markdown is plain HTML; the markdown punctuation (#, -, >, [ ])
+   is drawn back in with pseudo-elements. */
+.prose h1, .prose h2, .prose h3, .prose h4 { font-weight: 700; line-height: 1.35; scroll-margin-top: 80px; }
+.prose h1 { font-size: 26px; margin: 0 0 20px; letter-spacing: -0.01em; }
+.prose h2 { font-size: 19px; margin: 64px 0 18px; }
+.prose h3 { font-size: 15.5px; margin: 34px 0 12px; }
+.prose h4 { font-size: 15px; margin: 28px 0 10px; }
+.prose h1::before { content: "# "; color: var(--syntax); }
+.prose h2::before { content: "## "; color: var(--syntax); }
+.prose h3::before { content: "### "; color: var(--syntax); }
+.prose h4::before { content: "#### "; color: var(--syntax); }
+
+.prose p { margin: 0 0 20px; }
+.muted { color: var(--muted); }
+
+.prose strong { font-weight: 700; }
+.prose em { font-style: italic; }
+.prose :not(pre) > code {
+  background: var(--code-inline-bg);
+  padding: 1px 4px;
+  font-size: 14px;
+}
+
+.prose a, a.l { color: var(--accent); text-decoration: none; }
+.prose a::before, a.l::before { content: "["; color: var(--syntax); }
+.prose a::after, a.l::after { content: "]"; color: var(--syntax); }
+.prose a:hover, a.l:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.prose ul, .prose ol { list-style: none; margin: 0 0 20px; }
+.prose li { position: relative; padding-left: 2ch; margin-bottom: 8px; }
+.prose li > ul, .prose li > ol { margin: 8px 0 0; }
+.prose ul > li::before { content: "- "; color: var(--syntax); position: absolute; left: 0; }
+.prose ol { counter-reset: n; }
+.prose ol > li { padding-left: 3ch; }
+.prose ol > li::before {
+  counter-increment: n;
+  content: counter(n) ". ";
+  color: var(--syntax);
+  position: absolute;
+  left: 0;
+}
+
+/* GFM task lists: the "- [x]" box comes from rehype-markdown-style */
+.prose li.task-list-item { position: static; padding-left: 6ch; text-indent: -6ch; }
+.prose li.task-list-item::before { content: none; }
+.prose li.task-list-item .box { color: var(--syntax); }
+.prose li.task-list-item.done .box .x { color: var(--green); font-weight: 700; }
+
+.prose blockquote { margin: 0 0 20px; color: var(--muted); }
+.prose blockquote p { position: relative; margin-bottom: 0; padding-left: 2ch; }
+.prose blockquote p + p { margin-top: 10px; }
+.prose blockquote p::before { content: "> "; color: var(--syntax); position: absolute; left: 0; }
+
+.prose pre {
+  /* Shiki sets background/foreground inline from the theme's CSS variables */
+  background: var(--code-bg);
+  padding: 14px 18px;
+  margin: 0 0 20px;
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+.prose pre code { background: none; padding: 0; font-size: inherit; }
+
+.md-table { margin: 0 0 20px; overflow-x: auto; }
+.md-table table {
+  border-collapse: collapse;
+  font-size: 13.5px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.md-table th, .md-table td {
+  text-align: left;
+  padding: 4px 16px 4px 0;
+  border-bottom: 1px solid var(--rule);
+  font-weight: 400;
+  vertical-align: top;
+}
+.md-table th { font-weight: 700; }
+/* the last column holds prose ("notes", "what it gives you") and wraps */
+.md-table td:last-child, .md-table th:last-child { white-space: normal; min-width: 22ch; }
+
+.prose hr { border: 0; margin: 0 0 20px; color: var(--syntax); }
+.prose hr::after { content: "---"; }
+
+footer {
+  margin-top: 72px;
+  border-top: 1px solid var(--rule);
+  padding-top: 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ---------- responsive ---------- */
+@media (max-width: 1260px) {
+  aside.toc { display: none; }
+}
+@media (max-width: 700px) {
+  .shell { padding-left: 20px; padding-right: 20px; }
+  .page { padding-top: 20px; }
+  .prose h2 { margin-top: 48px; }
+}

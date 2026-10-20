@@ -1,0 +1,155 @@
+---
+import '../styles/global.css';
+import { getCollection } from 'astro:content';
+import { lexicons } from '../lib/lexicons';
+import type { MetaRow } from '../lib/meta';
+
+interface Props {
+  title: string;
+  description?: string;
+  meta?: MetaRow[];
+  headings?: { depth: number; slug: string; text: string }[];
+}
+
+const { title, description, meta = [], headings = [] } = Astro.props;
+
+const docs = await getCollection('docs');
+const nav = docs
+  .filter((d) => d.data.nav)
+  .sort((a, b) => a.data.nav!.order - b.data.nav!.order)
+  .map((d) => ({ label: d.data.nav!.label, href: d.id === 'index' ? '/' : `/${d.id}/` }));
+if (lexicons.length) nav.push({ label: 'lexicons', href: '/lexicons/' });
+
+const here = Astro.url.pathname.replace(/\/?$/, '/');
+const toc = headings.filter((h) => h.depth <= 2);
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  {description && <meta name="description" content={description} />}
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <script is:inline>
+    // Apply the theme before first paint: saved choice, else system preference.
+    (() => {
+      let t = null;
+      try { t = localStorage.getItem('theme'); } catch {}
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (t === 'dark') document.documentElement.classList.add('dark');
+    })();
+  </script>
+</head>
+<body>
+
+<header class="site">
+  <div class="shell">
+    <div class="mid">
+      <a class="brand" href="/" aria-label="agentid.at home">
+        <svg class="robot" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="12" y1="3.4" x2="12" y2="6"/>
+          <circle cx="12" cy="2.4" r="1.1" fill="currentColor" stroke="none"/>
+          <rect x="4.5" y="6" width="15" height="13" rx="3"/>
+          <line x1="1.8" y1="10.5" x2="1.8" y2="14.5"/>
+          <line x1="22.2" y1="10.5" x2="22.2" y2="14.5"/>
+          <circle cx="9.2" cy="11" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="14.8" cy="11" r="1.5" fill="currentColor" stroke="none"/>
+          <rect x="8" y="14.4" width="8" height="2.4" rx="1.2"/>
+        </svg>
+      </a>
+      <nav aria-label="Site pages">
+        {nav.map((item) => (
+          <a href={item.href} class:list={{ current: item.href === here }} aria-current={item.href === here ? 'page' : undefined}>{item.label}</a>
+        ))}
+      </nav>
+      <span class="ext">
+        <button class="theme" type="button" aria-label="Switch color theme">
+          <span class="br">[</span><span class="label">dark</span><span class="br">]</span>
+        </button>
+        <a href="https://github.com/agentid-at/spec">github</a>
+      </span>
+    </div>
+  </div>
+</header>
+
+<div class="shell page">
+
+<main>
+  {meta.length > 0 && (
+    <div class="frontmatter" aria-label="Document metadata">
+      <div class="fence">---</div>
+      <table>
+        {meta.map((row) => (
+          <tr>
+            <td class="k">{row.key}</td>
+            <td class:list={['v', { big: row.big }]}>
+              {row.href ? <a class="l" href={row.href}>{row.value}</a> : row.value}
+            </td>
+          </tr>
+        ))}
+      </table>
+      <div class="fence">---</div>
+    </div>
+  )}
+
+  <div class="prose">
+    <slot />
+  </div>
+
+  <footer>
+    agentid.at is not affiliated with Bluesky PBC. It builds on the <a class="l" href="https://atproto.com">AT Protocol</a>.
+  </footer>
+</main>
+
+{toc.length > 0 && (
+  <aside class="toc" aria-label="On this page">
+    <ul>
+      {toc.map((h) => <li data-target={h.slug}><a href={`#${h.slug}`}>{h.text}</a></li>)}
+    </ul>
+  </aside>
+)}
+
+</div>
+
+<script>
+  // theme toggle: system preference by default, remembered once chosen
+  const root = document.documentElement;
+  const themeBtn = document.querySelector<HTMLButtonElement>('button.theme')!;
+  const themeLabel = themeBtn.querySelector('.label')!;
+  const syncLabel = () => {
+    themeLabel.textContent = root.classList.contains('dark') ? 'light' : 'dark';
+  };
+  syncLabel();
+  themeBtn.addEventListener('click', () => {
+    const next = root.classList.contains('dark') ? 'light' : 'dark';
+    root.classList.toggle('dark', next === 'dark');
+    syncLabel();
+    try { localStorage.setItem('theme', next); } catch {}
+  });
+
+  // scroll-spy: bold the last heading that has scrolled past the top quarter
+  const items = [...document.querySelectorAll<HTMLLIElement>('aside.toc li')];
+  const targets = items.map((li) => document.getElementById(li.dataset.target!));
+  let queued = false;
+  const update = () => {
+    queued = false;
+    const line = innerHeight * 0.25;
+    let active = 0;
+    targets.forEach((t, i) => {
+      if (t && t.getBoundingClientRect().top <= line) active = i;
+    });
+    // short final sections never reach the line; select the last one at the bottom of the page
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) active = items.length - 1;
+    items.forEach((li, i) => li.classList.toggle('active', i === active));
+  };
+  if (items.length) {
+    addEventListener('scroll', () => {
+      if (!queued) { queued = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  }
+</script>
+
+</body>
+</html>
