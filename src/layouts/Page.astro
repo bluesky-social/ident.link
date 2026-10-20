@@ -21,6 +21,8 @@ const nav = docs
 if (lexicons.length) nav.push({ label: 'lexicons', href: '/lexicons/' });
 
 const here = Astro.url.pathname.replace(/\/?$/, '/');
+// a section link (e.g. specs) stays current on its subpages
+const isCurrent = (href: string) => (href === '/' ? here === href : here.startsWith(href));
 const toc = headings.filter((h) => h.depth <= 2);
 ---
 <!doctype html>
@@ -60,7 +62,7 @@ const toc = headings.filter((h) => h.depth <= 2);
       </a>
       <nav aria-label="Site pages">
         {nav.map((item) => (
-          <a href={item.href} class:list={{ current: item.href === here }} aria-current={item.href === here ? 'page' : undefined}>{item.label}</a>
+          <a href={item.href} class:list={{ current: isCurrent(item.href) }} aria-current={item.href === here ? 'page' : undefined}>{item.label}</a>
         ))}
       </nav>
       <span class="ext">

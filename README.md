@@ -37,8 +37,8 @@ punctuation back in (`#`, `-`, `>`, `[ ]`). Top-level and `##` headings go in th
 
 ## Lexicons
 
-Put each schema at `lexicons/<nsid path>.json`, e.g. `at.agentid.example` goes in
-`lexicons/at/agentid/example.json`. The build fails if a file's `id` doesn't match its path.
+Put each schema at `lexicons/<nsid path>.json`, e.g. `at.agentid.endorsement` goes in
+`lexicons/at/agentid/endorsement.json`. The build fails if a file's `id` doesn't match its path.
 
 The site lists every schema at `/lexicons/` and serves each one as raw JSON at
 `/lexicons/<nsid>.json` (with CORS open).

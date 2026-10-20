@@ -1,5 +1,5 @@
 // Lexicon schemas live in ./lexicons, laid out by NSID:
-// lexicons/at/agentid/example.json holds the schema with id "at.agentid.example".
+// lexicons/at/agentid/endorsement.json holds the schema with id "at.agentid.endorsement".
 
 export interface LexiconDoc {
   lexicon: number;
