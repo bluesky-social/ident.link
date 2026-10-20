@@ -10,6 +10,8 @@ export default defineConfig({
   output: 'static',
   markdown: {
     shikiConfig: { theme: shikiTheme },
+    // mermaid blocks are left as plain code and rendered in the browser (src/lib/mermaid.ts)
+    syntaxHighlight: { type: 'shiki', excludeLangs: ['math', 'mermaid'] },
     processor: satteri({
       hastPlugins: [markdownStylePlugin],
       // keep straight quotes, as in markdown source

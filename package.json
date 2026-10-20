@@ -10,7 +10,8 @@
     "deploy": "astro build && wrangler pages deploy"
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "^0.4.4",
     "astro": "^7.4.1",
-    "@astrojs/markdown-satteri": "^0.4.4"
+    "mermaid": "^12.2.0"
   }
 }

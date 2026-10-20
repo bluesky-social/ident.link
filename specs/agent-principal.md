@@ -33,10 +33,10 @@ For example:
 
 ```json
 {
-  "id": "did:plc:agent456",
+  "id": "did:plc:agent",
   "alsoKnownAs": [
     "at://helper.example.com",
-    "https://agentid.at/agent-of/did:plc:principal123"
+    "https://agentid.at/agent-of/did:plc:bob"
   ]
 }
 ```
@@ -54,11 +54,11 @@ The principal confirms the relationship by publishing an [`at.agentid.endorsemen
 ```json
 {
   "$type": "at.agentid.endorsement",
-  "agent": "did:plc:agent456"
+  "agent": "did:plc:agent"
 }
 ```
 
-- The record key MUST be the agent's DID, so the endorsement can be fetched directly by its URI: `at://did:plc:principal123/at.agentid.endorsement/did:plc:agent456`.
+- The record key MUST be the agent's DID, so the endorsement can be fetched directly by its URI: `at://did:plc:bob/at.agentid.endorsement/did:plc:agent`.
 - The `agent` field MUST equal the record key.
 
 A principal may endorse any number of agents, each with its own record.
@@ -97,7 +97,7 @@ The declaration could instead be a DID document service entry:
 {
   "id": "#principal",
   "type": "https://agentid.at/agent-of",
-  "serviceEndpoint": "did:plc:principal123"
+  "serviceEndpoint": "did:plc:bob"
 }
 ```
 

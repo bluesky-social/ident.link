@@ -11,7 +11,7 @@ const page = z.object({
   discussion: z.string().url().optional(),
 });
 
-// Every markdown file in ./docs becomes a page: docs/index.md -> /, docs/faq.md -> /faq/
+// Every markdown file in ./docs becomes a page: docs/index.md -> /, docs/about.md -> /about/
 const docs = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './docs' }),
   schema: page.extend({

@@ -20,16 +20,16 @@ npm run dev
 
 ## Docs
 
-Each `docs/**/*.md` file becomes a page: `docs/index.md` is `/`, `docs/faq.md` is `/faq/`.
+Each `docs/**/*.md` file becomes a page: `docs/index.md` is `/`, `docs/about.md` is `/about/`.
 Frontmatter:
 
 ```yaml
-title: faq                     # required
-subtitle: common questions     # optional; these fields show in the page's frontmatter block
+title: about                   # required
+subtitle: about the project    # optional; these fields show in the page's frontmatter block
 status: draft 01
 updated: 2026-10-20
 discussion: https://github.com/bluesky-social/agentid.at
-nav: { label: faq, order: 10 } # optional; adds the page to the header nav
+nav: { label: about, order: 10 } # optional; adds the page to the header nav
 ```
 
 Write normal markdown (GFM tables and task lists work too). The styles put the markdown
@@ -40,6 +40,12 @@ punctuation back in (`#`, `-`, `>`, `[ ]`). Top-level and `##` headings go in th
 
 Each `specs/*.md` file becomes `/specs/<name>/`, and `/specs/` lists them all with their
 status, updated date, and subtitle. Specs use the same frontmatter as docs, minus `nav`.
+
+## Markdown for agents
+
+Every docs page and spec is also served as its original markdown file: add `.md` to the page's
+path (`/index.md`, `/specs/agent-principal.md`). `/specs.md` lists all specs. Each
+HTML page advertises its markdown version with `<link rel="alternate" type="text/markdown">`.
 
 ## Lexicons
 

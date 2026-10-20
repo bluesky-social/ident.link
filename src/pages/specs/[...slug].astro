@@ -2,6 +2,7 @@
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import Page from '../../layouts/Page.astro';
 import { docMeta } from '../../lib/meta';
+import { markdownHref } from '../../lib/markdown-source';
 
 export async function getStaticPaths() {
   const specs = await getCollection('specs');
@@ -11,6 +12,6 @@ export async function getStaticPaths() {
 const { spec } = Astro.props as { spec: CollectionEntry<'specs'> };
 const { Content, headings } = await render(spec);
 ---
-<Page title={`${spec.data.title} — agentid.at`} description={spec.data.subtitle} meta={docMeta(spec.data)} headings={headings}>
+<Page title={`${spec.data.title} — agentid.at`} description={spec.data.subtitle} markdown={markdownHref(Astro.url.pathname)} meta={docMeta(spec.data)} headings={headings}>
   <Content />
 </Page>

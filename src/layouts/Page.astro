@@ -7,11 +7,13 @@ import type { MetaRow } from '../lib/meta';
 interface Props {
   title: string;
   description?: string;
+  /** URL of this page's markdown source, advertised for agents */
+  markdown?: string;
   meta?: MetaRow[];
   headings?: { depth: number; slug: string; text: string }[];
 }
 
-const { title, description, meta = [], headings = [] } = Astro.props;
+const { title, description, markdown, meta = [], headings = [] } = Astro.props;
 
 const [docs, specs] = await Promise.all([getCollection('docs'), getCollection('specs')]);
 const nav = docs
@@ -35,6 +37,7 @@ const toc = headings.filter((h) => h.depth <= 2);
   <title>{title}</title>
   {description && <meta name="description" content={description} />}
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  {markdown && <link rel="alternate" type="text/markdown" href={markdown} />}
   <script is:inline>
     // Apply the theme before first paint: saved choice, else system preference.
     (() => {
@@ -117,6 +120,9 @@ const toc = headings.filter((h) => h.depth <= 2);
 </div>
 
 <script>
+  import { renderMermaid } from '../lib/mermaid';
+  renderMermaid();
+
   // theme toggle: system preference by default, remembered once chosen
   const root = document.documentElement;
   const themeBtn = document.querySelector<HTMLButtonElement>('button.theme')!;
