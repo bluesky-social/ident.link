@@ -4,6 +4,7 @@ Source for the [agentid.at](https://agentid.at) site, a static Astro build hoste
 
 ```
 docs/          markdown pages → rendered into the site
+specs/         one markdown file per spec → /specs/<name>/, listed on /specs/
 lexicons/      lexicon schemas published under agentid.at, laid out by NSID
 design/        original HTML design mock (reference only)
 src/           layout, styles, and routes
@@ -27,13 +28,18 @@ title: faq                     # required
 subtitle: common questions     # optional; these fields show in the page's frontmatter block
 status: draft 01
 updated: 2026-10-20
-discussion: https://github.com/agentid-at/spec
+discussion: https://github.com/bluesky-social/agentid.at
 nav: { label: faq, order: 10 } # optional; adds the page to the header nav
 ```
 
 Write normal markdown (GFM tables and task lists work too). The styles put the markdown
 punctuation back in (`#`, `-`, `>`, `[ ]`). Top-level and `##` headings go in the
 "on this page" sidebar.
+
+## Specs
+
+Each `specs/*.md` file becomes `/specs/<name>/`, and `/specs/` lists them all with their
+status, updated date, and subtitle. Specs use the same frontmatter as docs, minus `nav`.
 
 ## Lexicons
 

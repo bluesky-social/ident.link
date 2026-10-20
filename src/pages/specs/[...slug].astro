@@ -1,0 +1,16 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Page from '../../layouts/Page.astro';
+import { docMeta } from '../../lib/meta';
+
+export async function getStaticPaths() {
+  const specs = await getCollection('specs');
+  return specs.map((spec) => ({ params: { slug: spec.id }, props: { spec } }));
+}
+
+const { spec } = Astro.props as { spec: CollectionEntry<'specs'> };
+const { Content, headings } = await render(spec);
+---
+<Page title={`${spec.data.title} — agentid.at`} description={spec.data.subtitle} meta={docMeta(spec.data)} headings={headings}>
+  <Content />
+</Page>

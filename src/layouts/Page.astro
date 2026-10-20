@@ -13,11 +13,13 @@ interface Props {
 
 const { title, description, meta = [], headings = [] } = Astro.props;
 
-const docs = await getCollection('docs');
+const [docs, specs] = await Promise.all([getCollection('docs'), getCollection('specs')]);
 const nav = docs
   .filter((d) => d.data.nav)
   .sort((a, b) => a.data.nav!.order - b.data.nav!.order)
   .map((d) => ({ label: d.data.nav!.label, href: d.id === 'index' ? '/' : `/${d.id}/` }));
+// the specs and lexicons sections follow the docs pages
+if (specs.length) nav.push({ label: 'specs', href: '/specs/' });
 if (lexicons.length) nav.push({ label: 'lexicons', href: '/lexicons/' });
 
 const here = Astro.url.pathname.replace(/\/?$/, '/');
@@ -69,7 +71,7 @@ const toc = headings.filter((h) => h.depth <= 2);
         <button class="theme" type="button" aria-label="Switch color theme">
           <span class="br">[</span><span class="label">dark</span><span class="br">]</span>
         </button>
-        <a href="https://github.com/agentid-at/spec">github</a>
+        <a href="https://github.com/bluesky-social/agentid.at">github</a>
       </span>
     </div>
   </div>
@@ -100,7 +102,7 @@ const toc = headings.filter((h) => h.depth <= 2);
   </div>
 
   <footer>
-    agentid.at is not affiliated with Bluesky PBC. It builds on the <a class="l" href="https://atproto.com">AT Protocol</a>.
+    agentid.at is developed by <a class="l" href="https://bsky.social/about">Bluesky PBC</a>. It builds on the <a class="l" href="https://atproto.com">AT Protocol</a>.
   </footer>
 </main>
 
