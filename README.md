@@ -3,8 +3,7 @@
 Source for the [agentid.at](https://agentid.at) site, a static Astro build hosted on Cloudflare Pages.
 
 ```
-docs/          markdown pages → rendered into the site
-specs/         one markdown file per spec → /specs/<name>/, listed on /specs/
+docs/          markdown pages → rendered into the site (docs/index.md is the spec, at /)
 lexicons/      lexicon schemas published under agentid.at, laid out by NSID
 design/        original HTML design mock (reference only)
 src/           layout, styles, and routes
@@ -36,16 +35,11 @@ Write normal markdown (GFM tables and task lists work too). The styles put the m
 punctuation back in (`#`, `-`, `>`, `[ ]`). Top-level and `##` headings go in the
 "on this page" sidebar.
 
-## Specs
-
-Each `specs/*.md` file becomes `/specs/<name>/`, and `/specs/` lists them all with their
-status, updated date, and subtitle. Specs use the same frontmatter as docs, minus `nav`.
-
 ## Markdown for agents
 
-Every docs page and spec is also served as its original markdown file: add `.md` to the page's
-path (`/index.md`, `/specs/agent-principal.md`). `/specs.md` lists all specs. Each
-HTML page advertises its markdown version with `<link rel="alternate" type="text/markdown">`.
+Every docs page is also served as its original markdown file: add `.md` to the page's path
+(`/index.md` for the home page). Each HTML page advertises its markdown version with
+`<link rel="alternate" type="text/markdown">`.
 
 ## Lexicons
 

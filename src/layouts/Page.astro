@@ -15,17 +15,16 @@ interface Props {
 
 const { title, description, markdown, meta = [], headings = [] } = Astro.props;
 
-const [docs, specs] = await Promise.all([getCollection('docs'), getCollection('specs')]);
+const docs = await getCollection('docs');
 const nav = docs
   .filter((d) => d.data.nav)
   .sort((a, b) => a.data.nav!.order - b.data.nav!.order)
   .map((d) => ({ label: d.data.nav!.label, href: d.id === 'index' ? '/' : `/${d.id}/` }));
-// the specs and lexicons sections follow the docs pages
-if (specs.length) nav.push({ label: 'specs', href: '/specs/' });
+// the lexicons section follows the docs pages
 if (lexicons.length) nav.push({ label: 'lexicons', href: '/lexicons/' });
 
 const here = Astro.url.pathname.replace(/\/?$/, '/');
-// a section link (e.g. specs) stays current on its subpages
+// a section link (e.g. lexicons) stays current on its subpages
 const isCurrent = (href: string) => (href === '/' ? here === href : here.startsWith(href));
 const toc = headings.filter((h) => h.depth <= 2);
 ---

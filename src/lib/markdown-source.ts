@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import type { CollectionEntry } from 'astro:content';
 
 // Serve a page's original markdown file (frontmatter included) so agents can read it directly.
-export async function markdownResponse(entry: CollectionEntry<'docs'> | CollectionEntry<'specs'>) {
+export async function markdownResponse(entry: CollectionEntry<'docs'>) {
   if (!entry.filePath) throw new Error(`${entry.collection}/${entry.id}: no source file`);
   return new Response(await readFile(entry.filePath, 'utf8'), {
     headers: { 'Content-Type': 'text/markdown; charset=utf-8' },

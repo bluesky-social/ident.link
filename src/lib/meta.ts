@@ -8,11 +8,9 @@ export interface MetaRow {
   big?: boolean;
 }
 
-type PageData = CollectionEntry<'docs'>['data'] | CollectionEntry<'specs'>['data'];
-
 export const formatDate = (d: Date) => d.toISOString().slice(0, 10);
 
-export function docMeta(data: PageData): MetaRow[] {
+export function docMeta(data: CollectionEntry<'docs'>['data']): MetaRow[] {
   const rows: MetaRow[] = [{ key: 'title', value: data.title, big: true }];
   if (data.subtitle) rows.push({ key: 'subtitle', value: data.subtitle });
   if (data.status) rows.push({ key: 'status', value: data.status });

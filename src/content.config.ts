@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
-// Frontmatter shared by docs and specs; shown in the block at the top of each page.
+// Frontmatter shown in the block at the top of each page.
 const page = z.object({
   title: z.string(),
   subtitle: z.string().optional(),
@@ -20,10 +20,4 @@ const docs = defineCollection({
   }),
 });
 
-// Every markdown file in ./specs becomes /specs/<name>/ and is listed on /specs/
-const specs = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './specs' }),
-  schema: page,
-});
-
-export const collections = { docs, specs };
+export const collections = { docs };
