@@ -6,7 +6,7 @@ import shikiTheme from '../../lib/shiki-theme.mjs';
 
 const meta = [
   { key: 'title', value: 'lexicons', big: true },
-  { key: 'subtitle', value: 'schemas published under agentid.at' },
+  { key: 'subtitle', value: 'schemas published under ident.link' },
   { key: 'count', value: String(lexicons.length) },
 ];
 const headings = [
@@ -14,10 +14,10 @@ const headings = [
   ...lexicons.map((lex) => ({ depth: 2, slug: lex.id, text: lex.id })),
 ];
 ---
-<Page title="lexicons — agentid.at" description="Lexicon schemas published under agentid.at" meta={meta} headings={headings}>
+<Page title="lexicons — ident.link" description="Lexicon schemas published under ident.link" meta={meta} headings={headings}>
   <h1 id="lexicons">Lexicons</h1>
   <p>
-    These are the lexicon schemas in the <code>at.agentid.*</code> namespace. The JSON
+    These are the lexicon schemas in the <code>link.ident.*</code> namespace. The JSON
     files in the repo's <code>lexicons/</code> folder are the source of truth.
     Each one is also served as raw JSON at <code>/lexicons/&lt;nsid&gt;.json</code>.
   </p>

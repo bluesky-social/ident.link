@@ -18,7 +18,7 @@ const { Content, headings } = await render(doc);
 const title =
   doc.id === 'index'
     ? [doc.data.title, doc.data.subtitle].filter(Boolean).join(' — ')
-    : `${doc.data.title} — agentid.at`;
+    : `${doc.data.title} — ident.link`;
 ---
 <Page title={title} description={doc.data.subtitle} markdown={markdownHref(Astro.url.pathname)} meta={docMeta(doc.data)} headings={headings}>
   <Content />

@@ -1,5 +1,4 @@
-node_modules/
-dist/
-.astro/
-.wrangler/
-.DS_Store
+.claude
+.astro
+dist
+node_modules

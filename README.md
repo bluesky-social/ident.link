@@ -1,11 +1,10 @@
-# agentid.at
+# ident.link
 
-Source for the [agentid.at](https://agentid.at) site, a static Astro build hosted on Cloudflare Pages.
+Source for the [ident.link](https://ident.link) site, a static Astro build hosted on Cloudflare Pages.
 
 ```
 docs/          markdown pages → rendered into the site (docs/index.md is the spec, at /)
-lexicons/      lexicon schemas published under agentid.at, laid out by NSID
-design/        original HTML design mock (reference only)
+lexicons/      lexicon schemas published under ident.link, laid out by NSID
 src/           layout, styles, and routes
 public/        static files copied as-is (favicon, Cloudflare _headers)
 ```
@@ -27,7 +26,7 @@ title: about                   # required
 subtitle: about the project    # optional; these fields show in the page's frontmatter block
 status: draft 01
 updated: 2026-10-20
-discussion: https://github.com/bluesky-social/agentid.at
+discussion: https://github.com/bluesky-social/ident.link
 nav: { label: about, order: 10 } # optional; adds the page to the header nav
 ```
 
@@ -43,14 +42,14 @@ Every docs page is also served as its original markdown file: add `.md` to the p
 
 ## Lexicons
 
-Put each schema at `lexicons/<nsid path>.json`, e.g. `at.agentid.endorsement` goes in
-`lexicons/at/agentid/endorsement.json`. The build fails if a file's `id` doesn't match its path.
+Put each schema at `lexicons/<nsid path>.json`, e.g. `link.ident.endorsement` goes in
+`lexicons/link/ident/endorsement.json`. The build fails if a file's `id` doesn't match its path.
 
 The site lists every schema at `/lexicons/` and serves each one as raw JSON at
 `/lexicons/<nsid>.json` (with CORS open).
 
 Under atproto lexicon resolution, a lexicon is fetched from the network rather than from
-this website: the `_lexicon.agentid.at` DNS TXT record names a DID, and that account's repo
+this website: the `_lexicon.ident.link` DNS TXT record names a DID, and that account's repo
 holds `com.atproto.lexicon.schema` records keyed by NSID. The files here are the source of
 truth for what gets published there.
 

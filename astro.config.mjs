@@ -5,7 +5,7 @@ import markdownStylePlugin from './src/lib/markdown-style-plugin.mjs';
 import shikiTheme from './src/lib/shiki-theme.mjs';
 
 export default defineConfig({
-  site: 'https://agentid.at',
+  site: 'https://ident.link',
   // Static output: Cloudflare Pages serves ./dist directly, no adapter needed.
   output: 'static',
   markdown: {

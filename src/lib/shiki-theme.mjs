@@ -1,7 +1,7 @@
 // Syntax theme matching the design: colors are CSS variables so code blocks
 // follow the light/dark toggle (see src/styles/global.css).
 export default {
-  name: 'agentid',
+  name: 'ident-link',
   type: 'light',
   colors: {
     'editor.foreground': 'var(--ink)',

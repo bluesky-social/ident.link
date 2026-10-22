@@ -5,7 +5,7 @@ const el = (tagName, properties, children) => ({ type: 'element', tagName, prope
 const text = (value) => ({ type: 'text', value });
 
 export default {
-  name: 'agentid-markdown-style',
+  name: 'ident-link-markdown-style',
   element: [
     {
       filter: ['table'],
