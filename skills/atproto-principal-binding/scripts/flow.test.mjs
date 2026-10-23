@@ -12,7 +12,7 @@ import {
   accountDocument,
 } from "./fixtures.mjs";
 
-test("HTTP workflow verifies both sides, preserves identity and automatically revokes operator grants", async () => {
+async function verifyHttpWorkflow(missingStatus) {
   const auditDirectory = await mkdtemp(join(tmpdir(), "ident-binding-test-"));
   let plc = plcData();
   let record;
@@ -45,7 +45,10 @@ test("HTTP workflow verifies both sides, preserves identity and automatically re
       if (url.origin === "https://plc.directory") return json(plc);
       assert.equal(url.origin, principal.pds);
       if (url.pathname.endsWith("getRecord")) {
-        if (!record) return json({ error: "RecordNotFound" }, 400);
+        if (!record && url.pathname.includes("repo.getRecord"))
+          return json({ error: "RecordNotFound" }, missingStatus);
+        // Deployed alpha sync returns HTTP 200 even for an absent record.
+        if (!record) return json({});
         return json(record);
       }
       throw new Error("Unexpected public read");
@@ -209,4 +212,9 @@ test("HTTP workflow verifies both sides, preserves identity and automatically re
     await close();
     await rm(auditDirectory, { recursive: true, force: true });
   }
-});
+
+}
+
+for (const missingStatus of [400, 404]) {
+  test(`HTTP workflow handles ${missingStatus} absence and alpha sync 200, preserves identity and revokes grants`, () => verifyHttpWorkflow(missingStatus));
+}

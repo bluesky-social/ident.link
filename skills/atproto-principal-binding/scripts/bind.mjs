@@ -47,7 +47,7 @@ export function createBinding(config, dependencies = {}) {
       )
         throw new Error("Existing endorsement conflicts");
     } else {
-      if (status !== 400 || data.error !== "RecordNotFound")
+      if ((status !== 400 && status !== 404) || data.error !== "RecordNotFound")
         throw new Error("Endorsement lookup failed");
       // putRecord requires create AND update, even for a new record. createRecord
       // matches our create-only grant and refuses to replace an existing record.
@@ -92,6 +92,27 @@ export function createBinding(config, dependencies = {}) {
   }
 
   async function verifyEndorsement() {
+    // The alpha sync endpoint can return a valid CAR without the requested
+    // absent record. Use the explicit repository error to identify absence;
+    // existing records still require signed repository proof below.
+    const lookup = new URL("/xrpc/com.atproto.repo.getRecord", principal.pds);
+    lookup.search = new URLSearchParams({
+      repo: PRINCIPAL,
+      collection: "link.ident.endorsement",
+      rkey: AGENT,
+    });
+    const found = await fetch(lookup, {
+      redirect: "error",
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!found.ok) {
+      const error = await found.json().catch(() => ({}));
+      if (
+        (found.status === 400 || found.status === 404) &&
+        error.error === "RecordNotFound"
+      ) throw new MissingEndorsementError();
+      throw new Error("Endorsement lookup unavailable");
+    }
     const principalNow = await resolveIdentity(PRINCIPAL);
     const principalDoc = principalNow.didDoc;
     if (
