@@ -4,10 +4,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "predev": "node scripts/package-skill.mjs",
     "dev": "astro dev",
-    "build": "astro build",
+    "pack:skill": "node scripts/package-skill.mjs",
+    "build": "node scripts/package-skill.mjs && astro build",
     "preview": "astro preview",
-    "deploy": "astro build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.4",

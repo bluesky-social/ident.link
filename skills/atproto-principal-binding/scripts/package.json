@@ -1,0 +1,15 @@
+{
+  "name": "ident-principal-binding",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node bind.mjs",
+    "test": "node --test *.test.mjs",
+    "check": "node --check bind.mjs && node --check config.mjs && node --check page.mjs"
+  },
+  "dependencies": {
+    "@atproto/oauth-client-node": "0.5.12",
+    "@atproto/repo": "0.11.1"
+  }
+}
