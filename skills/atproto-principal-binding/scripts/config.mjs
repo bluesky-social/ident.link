@@ -3,6 +3,7 @@ import {
   buildAtprotoLoopbackClientMetadata,
   requestLocalLock,
 } from "@atproto/oauth-client-node";
+import { publicFetch } from "./network.mjs";
 
 export function parseOptions(args) {
   const options = { port: 8767 };
@@ -71,6 +72,7 @@ const ephemeral = () => {
 
 // Use the official resolver for handle ↔ DID checks, including did:web principals.
 const resolverClient = new NodeOAuthClient({
+  fetch: publicFetch,
   clientMetadata: buildAtprotoLoopbackClientMetadata({
     scope: "atproto",
     redirect_uris: ["http://127.0.0.1:8767/resolve"],
@@ -102,7 +104,7 @@ export async function resolveAccount(identifier) {
 }
 
 async function discoverIssuer(account) {
-  const response = await fetch(
+  const response = await publicFetch(
     `${account.pds}/.well-known/oauth-protected-resource`,
     { redirect: "error", signal: AbortSignal.timeout(15_000) },
   );

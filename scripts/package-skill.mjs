@@ -13,6 +13,8 @@ export const files = [
   "scripts/package-lock.json",
   "scripts/bind.mjs",
   "scripts/config.mjs",
+  "scripts/network.mjs",
+  "scripts/network.test.mjs",
   "scripts/page.mjs",
   "scripts/style.css",
   "scripts/fixtures.mjs",

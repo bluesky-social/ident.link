@@ -7,6 +7,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { resolveConfig, parseOptions, resolveAccount } from "./config.mjs";
 import { renderPage, pageHeaders } from "./page.mjs";
+import { publicFetch } from "./network.mjs";
 import { isDeepStrictEqual } from "node:util";
 import { verifyRecords } from "@atproto/repo";
 import {
@@ -16,7 +17,7 @@ import {
 } from "@atproto/oauth-client-node";
 
 export function createBinding(config, dependencies = {}) {
-  const fetch = dependencies.fetch ?? globalThis.fetch;
+  const fetch = dependencies.fetch ?? publicFetch;
   const resolveIdentity = dependencies.resolveAccount ?? resolveAccount;
   const verifyRepository = dependencies.verifyRecords ?? verifyRecords;
   const createClient =
@@ -238,6 +239,7 @@ export function createBinding(config, dependencies = {}) {
       );
       stores[role] = store;
       clients[role] = createClient({
+        fetch,
         clientMetadata: buildAtprotoLoopbackClientMetadata({
           scope: config.scope,
           redirect_uris: [`${ORIGIN}/callback/${role}`],

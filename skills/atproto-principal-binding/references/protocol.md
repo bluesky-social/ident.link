@@ -38,6 +38,11 @@ avoids disclosing paths or queries while preserving the form Origin header.
 The CSP allows form redirects only to the pinned authorization server origins.
 It allows nonce-scoped inline CSS and no scripts or third-party assets.
 
+All helper and OAuth/resolver HTTP requests use a public-only HTTPS dispatcher.
+DNS results are checked at socket connection time and passed directly to the
+connector, blocking private, link-local, mapped-private, and mixed address sets
+without a second DNS lookup. Redirects and literal-address URLs are rejected.
+
 Public identity snapshots can identify accounts. Runtime snapshots belong in
 the operator's temporary audit directory, not in the redistributed package.
 

@@ -2,14 +2,18 @@
   "name": "ident-principal-binding",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node bind.mjs",
     "test": "node --test *.test.mjs",
-    "check": "node --check bind.mjs && node --check config.mjs && node --check page.mjs"
+    "check": "node --check bind.mjs && node --check config.mjs && node --check page.mjs && node --check network.mjs"
   },
   "dependencies": {
     "@atproto/oauth-client-node": "0.5.12",
-    "@atproto/repo": "0.11.1"
+    "@atproto/repo": "0.11.1",
+    "ipaddr.js": "2.5.0",
+    "undici": "7.30.1"
   }
 }
