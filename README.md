@@ -1,6 +1,6 @@
 # ident.link
 
-Source for the [ident.link](https://ident.link) site, a static Astro build hosted on Cloudflare Pages.
+Source for the [ident.link](https://ident.link) site, a static Astro build hosted on Cloudflare Workers.
 
 ```
 docs/          markdown pages → rendered into the site (docs/index.md is the spec, at /)
