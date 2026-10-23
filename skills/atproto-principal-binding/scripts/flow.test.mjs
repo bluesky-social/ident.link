@@ -21,6 +21,7 @@ test("HTTP workflow verifies both sides, preserves identity and automatically re
   const revoked = [];
   const scopes = [];
   const writes = [];
+  let authorizations = 0;
   const account = (did) => (did === agent.did ? agent : principal);
   const json = (value, status = 200) =>
     new Response(JSON.stringify(value), { status });
@@ -93,6 +94,7 @@ test("HTTP workflow verifies both sides, preserves identity and automatically re
       };
       return {
         async authorize(did) {
+          authorizations++;
           assert.equal(did, value.did);
           return new URL(value.issuer + "/authorize");
         },
@@ -181,6 +183,27 @@ test("HTTP workflow verifies both sides, preserves identity and automatically re
     assert.equal(unavailable.confirmed, false);
     assert.equal(unavailable.declaration, "unavailable");
     assert.equal(unavailable.endorsement, "unavailable");
+    simulateOutage = false;
+    const secondConfig = { ...config, port: 18770, auditDirectory };
+    const second = await createBinding(secondConfig, dependencies).startBinding(
+      { signals: false },
+    );
+    try {
+      const secondOrigin = "http://127.0.0.1:18770";
+      const html = await (await fetch(secondOrigin)).text();
+      const csrf = html.match(/name="csrf" value="([a-f0-9]+)"/)[1];
+      const attemptsBefore = authorizations;
+      const response = await fetch(secondOrigin + "/login/agent", {
+        method: "POST",
+        headers: { Origin: secondOrigin },
+        body: new URLSearchParams({ csrf }),
+        redirect: "manual",
+      });
+      assert.equal(response.status, 409);
+      assert.equal(authorizations, attemptsBefore);
+    } finally {
+      await second.close();
+    }
   } finally {
     simulateOutage = false;
     await close();

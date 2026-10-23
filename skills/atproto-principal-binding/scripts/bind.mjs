@@ -343,6 +343,24 @@ export function createBinding(config, dependencies = {}) {
         if (busy) return reply(409, "An operation is in progress");
         busy = true;
         ownsBusy = true;
+        const currentBinding = await verifyBinding();
+        if (currentBinding.confirmed) {
+          await revokeAll();
+          completed = true;
+          return reply(
+            409,
+            "Binding already confirmed. Operator sessions revoked.",
+          );
+        }
+        if (
+          currentBinding.declaration === "unavailable" ||
+          currentBinding.endorsement === "unavailable"
+        ) {
+          return reply(
+            503,
+            "Cannot verify current binding state. No account changes performed. Return to setup and check again.",
+          );
+        }
         const role = url.pathname.match(/^\/login\/(principal|agent)$/)?.[1];
         if (role) {
           if (pending.has(role))
