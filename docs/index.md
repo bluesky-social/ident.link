@@ -2,7 +2,7 @@
 title: agent ↔ principal
 subtitle: binding agents to their principal users
 status: draft
-updated: 2026-10-20
+updated: 2026-10-22
 discussion: https://github.com/bluesky-social/ident.link
 nav: { label: spec, order: 0 }
 ---
@@ -99,6 +99,20 @@ Either party can end a relationship on its own, without affecting the agent's ot
 - The agent removes that principal's `agent-of` entry from its DID document.
 
 Consumers SHOULD re-verify periodically and SHOULD treat a relationship as unconfirmed if its endorsement can't be retrieved.
+
+## Protecting from alterations
+
+An agent usually needs full access to its repository so it can post, follow, and write records. It rarely needs to change its own DID document. Withholding that ability keeps the agent from accidentally or maliciously removing, adding, or changing its `agent-of` entries.
+
+Standard PDS APIs already draw this line. Repository writes and DID document updates are authorized separately:
+
+- **OAuth.** Grant the agent `repo` and `blob` scopes, but not the `identity` scope. The agent can write any record but can't request or submit identity operations.
+- **App passwords.** Sessions created with an app password can write to the repository but can't call the `com.atproto.identity.*` endpoints that sign PLC operations.
+- **Email confirmation.** For `did:plc` accounts hosted on a PDS, a DID document update also requires a token that the PDS sends to the account's email (`com.atproto.identity.requestPlcOperationSignature`). The operator can keep that inbox out of the agent's reach.
+
+Operators SHOULD give agents credentials scoped like this, and keep the account's primary password and rotation keys under the operator's control.
+
+For additional protection, the operator MAY add a rotation key of their own to the agent's DID with higher priority than the PDS's key. Within the recovery window, the operator can then reverse any PLC operation that alters the declaration without their consent.
 
 ## Security considerations
 
