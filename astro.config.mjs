@@ -6,7 +6,7 @@ import shikiTheme from './src/lib/shiki-theme.mjs';
 
 export default defineConfig({
   site: 'https://ident.link',
-  // Static output: Cloudflare Pages serves ./dist directly, no adapter needed.
+  // Static output: Cloudflare Workers static assets serve ./dist directly, no adapter needed.
   output: 'static',
   markdown: {
     shikiConfig: { theme: shikiTheme },

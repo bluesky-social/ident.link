@@ -1,3 +1,6 @@
 name = "ident-link"
-pages_build_output_dir = "./dist"
 compatibility_date = "2026-10-20"
+
+# Static site served via Workers static assets (honors public/_headers)
+[assets]
+directory = "./dist"
