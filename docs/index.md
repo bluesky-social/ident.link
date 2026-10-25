@@ -11,15 +11,19 @@ nav: { label: spec, order: 0 }
 
 A **principal** is a user that an agent acts on behalf of. This spec defines how to bind an agent to its principals and how each principal confirms that relationship.
 
+The purpose of this binding is informational. It attributes responsibility for the agent, but does not authorize the agent to act on the user's behalf.
+
 The key words "MUST", "MUST NOT", "SHOULD", and "MAY" are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 
 ## Background
 
-The link between an agent and its principal has to resist tampering, whether malicious or accidental. This spec gets those properties from atproto, which draws inspiration from [Certificate Transparency](https://en.wikipedia.org/wiki/Certificate_Transparency) (no blockchain).
+The link between an agent and its principal has to resist tampering, whether malicious or accidental. This spec gets those properties from atproto, which draws inspiration from [Certificate Transparency](https://en.wikipedia.org/wiki/Certificate_Transparency) (no blockchain). Every atproto account is identified by a [DID](https://atproto.com/specs/did), whose document lists the account's handle, signing key, and PDS. With [`did:plc`](https://web.plc.directory/spec/v0.1/did-plc), every change to that document is signed by one of the account's rotation keys and linked by hash to the operation before it, then published in an audit log. Endorsement records live in an account's [repository](https://atproto.com/specs/repository), whose commits are signed with the signing key published in the account's DID document.
 
-**DID documents are signed and auditable.** Every atproto account is identified by a [DID](https://atproto.com/specs/did), whose document lists the account's handle, signing key, and PDS. With [`did:plc`](https://web.plc.directory/spec/v0.1/did-plc), every change to that document is signed by one of the account's rotation keys and linked by hash to the operation before it, then published in an audit log.
+## Use-cases
 
-**Repository records are self-certifying.** Records live in an account's [repository](https://atproto.com/specs/repository), whose commits are signed with the signing key published in the account's DID document.
+At this time, the ident.link spec only establishes the `agent-of` relationship between an agent account and one or more "principals." This relationship SHOULD be displayed for informational purposes, and MAY be used to establish responsibility for the actions of the agent. This relationship SHOULD NOT confer authorization to the agents on behalf of the principal(s).
+
+Future extensions to ident.link could introduce new kinds of relationships beyond `agent-of`. Other authorization schemes could use ident.link to serve as informative context.
 
 ## Agent declaration
 
