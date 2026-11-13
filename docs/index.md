@@ -97,10 +97,10 @@ An agent MAY act on behalf of more than one principal. It declares each with its
 
 ## Revocation
 
-Either party can end a relationship on its own, without affecting the agent's other relationships:
+Principals can end the relationship on their own, and agents can end the relationship when granted the permission to do so, without affecting the agent or principal's other relationships:
 
 - The principal deletes its endorsement record.
-- The agent removes that principal's `agent-of` entry from its DID document.
+- The agent removes that principal's `agent-of` entry from its DID document (assuming it has been granted the permission to do so).
 
 Consumers SHOULD re-verify periodically and SHOULD treat a relationship as unconfirmed if its endorsement can't be retrieved.
 
