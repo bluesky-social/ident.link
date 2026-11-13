@@ -1,6 +1,15 @@
 name = "ident-link"
+main = "worker/build/index.js"
 compatibility_date = "2026-10-20"
+# Upstream DID documents choose PDS URLs; never bypass Cloudflare's public
+# routing when fetching an untrusted endpoint in this zone.
+compatibility_flags = ["global_fetch_strictly_public"]
 
-# Static site served via Workers static assets (honors public/_headers)
+[build]
+command = "cd worker && worker-build --release"
+watch_dir = "worker/src"
+
 [assets]
 directory = "./dist"
+binding = "ASSETS"
+run_worker_first = ["/agent-of/*"]

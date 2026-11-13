@@ -1,0 +1,25 @@
+[package]
+name = "ident-link-worker"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+atproto-identity = { git = "https://github.com/bluesky-social/rust-tools.git", rev = "bde6a351ef83aae72284743564a07fabd04b2218" }
+egress = { git = "https://github.com/bluesky-social/rust-tools.git", rev = "bde6a351ef83aae72284743564a07fabd04b2218" }
+futures = "0.3"
+percent-encoding = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+url = "2"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+worker = "0.9"
+js-sys = "0.3"
+
+[profile.release]
+lto = true
+codegen-units = 1

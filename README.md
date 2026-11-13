@@ -13,8 +13,38 @@ public/        static files copied as-is (favicon, Cloudflare _headers)
 
 ```sh
 npm install
-npm run dev
+npm run dev # Astro pages only
 ```
+
+The pair-check endpoint is a Rust Worker that serves JSON or the static HTML
+shell at the same URL, according to `Accept`. To run it locally, install the
+WebAssembly target and the Workers build tool once, then build the site and
+start Wrangler:
+
+```sh
+rustup target add wasm32-unknown-unknown
+cargo install worker-build --version 0.9.0 --locked
+npm run build
+npx wrangler dev
+```
+
+Run the pair-check tests without network access with:
+
+```sh
+cargo test --manifest-path worker/Cargo.toml
+```
+
+## Pair check
+
+`GET /agent-of/<principal-did>/endorses/<agent-did>` returns HTML to browsers
+and JSON to requests for `application/json`, `*/*`, or no `Accept` header. The
+HTML page fetches JSON from the same URL. The Worker resolves the two DIDs and
+reads the endorsement with `com.atproto.repo.getRecord` from the principal's
+PDS, using [`rust-tools`](https://github.com/bluesky-social/rust-tools) for
+identity and outbound requests. It does not verify a signed repository proof.
+An unavailable upstream is a 503, not a negative confirmation. Successful JSON
+responses may be cached by the browser for 30 seconds; they are not cached in
+the shared edge cache.
 
 ## Docs
 
@@ -53,11 +83,8 @@ this website: the `_lexicon.ident.link` DNS TXT record names a DID, and that acc
 holds `com.atproto.lexicon.schema` records keyed by NSID. The files here are the source of
 truth for what gets published there.
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare Workers)
 
-In the Pages project settings:
-
-- Build command: `npm run build`
-- Build output directory: `dist`
-
-Or deploy from your machine with `npx wrangler pages deploy` (`wrangler.toml` already points it at `./dist`).
+`npm run deploy` builds the Astro assets and uses Wrangler to build and deploy
+the Rust Worker and assets together. The Worker build requires `worker-build`
+and the WebAssembly target described above.

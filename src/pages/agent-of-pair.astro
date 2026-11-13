@@ -1,0 +1,280 @@
+---
+import Page from '../layouts/Page.astro';
+---
+
+<Page
+  title="Agent–principal check — ident.link"
+  description="Check an agent's declaration and a principal's endorsement."
+>
+  <h1 id="agent-principal-check">Agent–principal check</h1>
+  <p>
+    This page reports the current check for an agent's declaration and a principal's
+    endorsement. See the <a href="/#verification">ident.link specification</a> for how
+    to independently verify a pair. This check reads the record from the principal's PDS;
+    it does not verify a signed repository proof.
+  </p>
+
+  <section id="pair-result" aria-labelledby="pair-result-title" aria-busy="false">
+    <h2 id="pair-result-title">Pair check</h2>
+    <p id="pair-result-summary" role="status" aria-live="polite" aria-atomic="true">
+      Enable JavaScript to load the current check.
+    </p>
+    <p id="pair-error" role="alert" hidden></p>
+
+    <ul id="pair-issues" hidden>
+      <li id="missing-declaration" hidden>
+        The agent's DID document is missing a declaration for this principal.
+      </li>
+      <li id="missing-endorsement" hidden>
+        The principal's repository is missing an endorsement for this agent.
+      </li>
+      <li id="invalid-endorsement" hidden>
+        The endorsement is invalid or does not match this agent and principal.
+      </li>
+    </ul>
+
+    <dl id="pair-details" hidden>
+      <div>
+        <dt>agent</dt>
+        <dd><code id="pair-agent"></code></dd>
+      </div>
+      <div>
+        <dt>principal</dt>
+        <dd><code id="pair-principal"></code></dd>
+      </div>
+      <div>
+        <dt>checked at</dt>
+        <dd><code id="pair-checked-at"></code></dd>
+      </div>
+      <div id="endorsement-uri-row" hidden>
+        <dt>endorsement URI</dt>
+        <dd><code id="endorsement-uri-value"></code></dd>
+      </div>
+      <div id="endorsement-cid-row" hidden>
+        <dt>endorsement CID</dt>
+        <dd><code id="endorsement-cid-value"></code></dd>
+      </div>
+    </dl>
+  </section>
+
+  <noscript>
+    <p>
+      <strong>JavaScript is disabled.</strong> This browser view cannot fetch the current
+      result. Request this same URL with an <code>Accept: application/json</code> header
+      to read the check as JSON instead.
+    </p>
+  </noscript>
+
+  <script>
+    interface Endorsement {
+      uri: string;
+      cid?: string;
+    }
+
+    interface PairCheck {
+      principal: string;
+      agent: string;
+      confirmed: boolean;
+      declared: boolean;
+      endorsement: Endorsement | null;
+      checkedAt: string;
+    }
+
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null;
+
+    function parsePairCheck(value: unknown): PairCheck | null {
+      if (
+        !isRecord(value) ||
+        typeof value.principal !== 'string' ||
+        typeof value.agent !== 'string' ||
+        typeof value.confirmed !== 'boolean' ||
+        typeof value.declared !== 'boolean' ||
+        typeof value.checkedAt !== 'string' ||
+        value.endorsement === undefined
+      ) {
+        return null;
+      }
+
+      let endorsement: Endorsement | null = null;
+      if (value.endorsement !== null) {
+        if (
+          !isRecord(value.endorsement) ||
+          typeof value.endorsement.uri !== 'string' ||
+          (value.endorsement.cid !== undefined && typeof value.endorsement.cid !== 'string')
+        ) {
+          return null;
+        }
+        endorsement = { uri: value.endorsement.uri };
+        if (typeof value.endorsement.cid === 'string') {
+          endorsement.cid = value.endorsement.cid;
+        }
+      }
+
+      return {
+        principal: value.principal,
+        agent: value.agent,
+        confirmed: value.confirmed,
+        declared: value.declared,
+        endorsement,
+        checkedAt: value.checkedAt,
+      };
+    }
+
+    const pairResult = document.getElementById('pair-result')!;
+    const resultTitle = document.getElementById('pair-result-title')!;
+    const resultSummary = document.getElementById('pair-result-summary')!;
+    const errorMessage = document.getElementById('pair-error')!;
+    const issues = document.getElementById('pair-issues')!;
+    const missingDeclaration = document.getElementById('missing-declaration')!;
+    const missingEndorsement = document.getElementById('missing-endorsement')!;
+    const invalidEndorsement = document.getElementById('invalid-endorsement')!;
+    const details = document.getElementById('pair-details')!;
+    const endorsementUriRow = document.getElementById('endorsement-uri-row')!;
+    const endorsementCidRow = document.getElementById('endorsement-cid-row')!;
+
+    function finishLoading() {
+      pairResult.setAttribute('aria-busy', 'false');
+    }
+
+    function showCannotCheck(reason: string) {
+      finishLoading();
+      resultTitle.textContent = 'Cannot check this pair';
+      resultSummary.hidden = true;
+      issues.hidden = true;
+      details.hidden = true;
+      endorsementUriRow.hidden = true;
+      endorsementCidRow.hidden = true;
+      errorMessage.textContent = `Cannot check this pair. ${reason}`;
+      errorMessage.hidden = false;
+    }
+
+    function showResult(result: PairCheck) {
+      finishLoading();
+      errorMessage.hidden = true;
+      resultSummary.hidden = false;
+      details.hidden = false;
+
+      // JSON values are inserted as text, never as markup or link destinations.
+      document.getElementById('pair-agent')!.textContent = result.agent;
+      document.getElementById('pair-principal')!.textContent = result.principal;
+      document.getElementById('pair-checked-at')!.textContent = result.checkedAt;
+
+      const hasEndorsement = result.endorsement !== null;
+      endorsementUriRow.hidden = !hasEndorsement;
+      endorsementCidRow.hidden = typeof result.endorsement?.cid !== 'string';
+      if (result.endorsement) {
+        document.getElementById('endorsement-uri-value')!.textContent = result.endorsement.uri;
+        if (result.endorsement.cid !== undefined) {
+          document.getElementById('endorsement-cid-value')!.textContent = result.endorsement.cid;
+        }
+      }
+
+      resultTitle.textContent = result.confirmed ? 'Pair confirmed' : 'Pair not confirmed';
+      resultSummary.textContent = result.confirmed
+        ? 'The agent declares this principal, and the principal endorses the agent.'
+        : 'This relationship is not confirmed. The missing or invalid evidence is listed below.';
+
+      issues.hidden = result.confirmed;
+      missingDeclaration.hidden = result.declared;
+      missingEndorsement.hidden = hasEndorsement;
+      invalidEndorsement.hidden = !(
+        !result.confirmed &&
+        result.declared &&
+        hasEndorsement
+      );
+    }
+
+    async function checkPair() {
+      pairResult.setAttribute('aria-busy', 'true');
+      resultTitle.textContent = 'Checking this pair';
+      resultSummary.textContent = 'Fetching the current declaration and endorsement check…';
+      resultSummary.hidden = false;
+      errorMessage.hidden = true;
+      issues.hidden = true;
+      details.hidden = true;
+
+      let response: Response;
+      try {
+        response = await fetch(window.location.pathname, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+        });
+      } catch {
+        showCannotCheck('A network error prevented the check. Try again later.');
+        return;
+      }
+
+      if (response.status === 503) {
+        showCannotCheck('The checking service is temporarily unavailable. Try again later.');
+        return;
+      }
+      if (response.status !== 200) {
+        showCannotCheck(`The checking service returned HTTP ${response.status}; no result is available.`);
+        return;
+      }
+
+      let body: unknown;
+      try {
+        body = await response.json();
+      } catch {
+        showCannotCheck('The checking service returned an invalid JSON response.');
+        return;
+      }
+
+      const result = parsePairCheck(body);
+      if (!result || (result.confirmed && (!result.declared || !result.endorsement))) {
+        showCannotCheck('The checking service returned an inconsistent or invalid result.');
+        return;
+      }
+
+      showResult(result);
+    }
+
+    void checkPair();
+  </script>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+
+    #pair-result {
+      margin-top: 32px;
+    }
+
+    #pair-error {
+      border-left: 2px solid var(--accent);
+      padding-left: 2ch;
+    }
+
+    #pair-details {
+      margin: 24px 0 0;
+    }
+
+    #pair-details > div {
+      display: grid;
+      grid-template-columns: 18ch minmax(0, 1fr);
+      gap: 1ch;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    #pair-details dt {
+      color: var(--green);
+    }
+
+    #pair-details dd {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 500px) {
+      #pair-details > div {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+    }
+  </style>
+</Page>
