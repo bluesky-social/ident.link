@@ -87,4 +87,5 @@ truth for what gets published there.
 
 `npm run deploy` builds the Astro assets and uses Wrangler to build and deploy
 the Rust Worker and assets together. The Worker build requires `worker-build`
-and the WebAssembly target described above.
+and the WebAssembly target described above. Cloudflare Workers Builds installs
+a pinned Rust toolchain and `worker-build` automatically.
