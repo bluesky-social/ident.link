@@ -9,7 +9,7 @@ import Page from '../layouts/Page.astro';
   <h1 id="agent-principal-check">Agent–principal check</h1>
 
   <section id="pair-result" aria-labelledby="pair-result-title" aria-busy="false">
-    <h2><span id="pair-result-title" role="status" aria-live="polite" aria-atomic="true">Result</span></h2>
+    <h2><span id="pair-result-title">Result</span></h2>
     <p id="pair-result-summary">JavaScript is required to show the result.</p>
     <p id="pair-error" role="alert" hidden></p>
 
@@ -47,6 +47,7 @@ import Page from '../layouts/Page.astro';
       This check trusts the principal's PDS. <a href="/#verification">Verify independently</a>.
     </p>
   </section>
+  <p id="pair-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 
   <script>
     interface Endorsement {
@@ -107,6 +108,7 @@ import Page from '../layouts/Page.astro';
     const pairResult = document.getElementById('pair-result')!;
     const resultTitle = document.getElementById('pair-result-title')!;
     const resultSummary = document.getElementById('pair-result-summary')!;
+    const announcement = document.getElementById('pair-announcement')!;
     const errorMessage = document.getElementById('pair-error')!;
     const issues = document.getElementById('pair-issues')!;
     const missingDeclaration = document.getElementById('missing-declaration')!;
@@ -123,6 +125,7 @@ import Page from '../layouts/Page.astro';
     function showCannotCheck(reason: string) {
       finishLoading();
       resultTitle.textContent = 'Couldn’t check';
+      announcement.textContent = '';
       resultSummary.hidden = true;
       issues.hidden = true;
       details.hidden = true;
@@ -166,11 +169,21 @@ import Page from '../layouts/Page.astro';
         result.declared &&
         hasEndorsement
       );
+
+      const explanation = result.confirmed
+        ? resultSummary.textContent
+        : [missingDeclaration, missingEndorsement, invalidEndorsement]
+            .filter((item) => !item.hidden)
+            .map((item) => item.textContent?.trim())
+            .filter(Boolean)
+            .join(' ');
+      announcement.textContent = `${resultTitle.textContent}. ${explanation}`;
     }
 
     async function checkPair() {
       pairResult.setAttribute('aria-busy', 'true');
       resultTitle.textContent = 'Checking…';
+      announcement.textContent = 'Checking…';
       resultSummary.textContent = '';
       resultSummary.hidden = true;
       errorMessage.hidden = true;
@@ -191,6 +204,10 @@ import Page from '../layouts/Page.astro';
 
       if (response.status === 503) {
         showCannotCheck('The service is unavailable. Try again.');
+        return;
+      }
+      if (response.status === 404) {
+        showCannotCheck('A DID could not be resolved.');
         return;
       }
       if (response.status !== 200) {
@@ -221,6 +238,18 @@ import Page from '../layouts/Page.astro';
   <style>
     [hidden] {
       display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     #pair-result {
