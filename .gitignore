@@ -2,3 +2,5 @@
 .astro
 dist
 node_modules
+/public/skills/atproto-principal-binding/
+/public/downloads/atproto-principal-binding.tar.gz

@@ -1,0 +1,30 @@
+name: Validate site and binding skill
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            skills/atproto-principal-binding/scripts/package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm ci --prefix skills/atproto-principal-binding/scripts --ignore-scripts --no-audit --no-fund
+      - run: npm test --prefix skills/atproto-principal-binding/scripts
+      - run: npm run check --prefix skills/atproto-principal-binding/scripts
+      - run: npm run build
+      - run: tar -tzf public/downloads/atproto-principal-binding.tar.gz
