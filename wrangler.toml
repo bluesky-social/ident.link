@@ -13,3 +13,5 @@ watch_dir = "worker/src"
 directory = "./dist"
 binding = "ASSETS"
 run_worker_first = ["/agent-of/*"]
+
+[previews]
