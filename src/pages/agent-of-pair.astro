@@ -7,30 +7,16 @@ import Page from '../layouts/Page.astro';
   description="Check an agent's declaration and a principal's endorsement."
 >
   <h1 id="agent-principal-check">Agent–principal check</h1>
-  <p>
-    This page reports the current check for an agent's declaration and a principal's
-    endorsement. See the <a href="/#verification">ident.link specification</a> for how
-    to independently verify a pair. This check reads the record from the principal's PDS;
-    it does not verify a signed repository proof.
-  </p>
 
   <section id="pair-result" aria-labelledby="pair-result-title" aria-busy="false">
-    <h2 id="pair-result-title">Pair check</h2>
-    <p id="pair-result-summary" role="status" aria-live="polite" aria-atomic="true">
-      Enable JavaScript to load the current check.
-    </p>
+    <h2><span id="pair-result-title" role="status" aria-live="polite" aria-atomic="true">Result</span></h2>
+    <p id="pair-result-summary">JavaScript is required to show the result.</p>
     <p id="pair-error" role="alert" hidden></p>
 
     <ul id="pair-issues" hidden>
-      <li id="missing-declaration" hidden>
-        The agent's DID document is missing a declaration for this principal.
-      </li>
-      <li id="missing-endorsement" hidden>
-        The principal's repository is missing an endorsement for this agent.
-      </li>
-      <li id="invalid-endorsement" hidden>
-        The endorsement is invalid or does not match this agent and principal.
-      </li>
+      <li id="missing-declaration" hidden>The agent hasn't declared this principal.</li>
+      <li id="missing-endorsement" hidden>The principal hasn't endorsed this agent.</li>
+      <li id="invalid-endorsement" hidden>The endorsement is invalid or names a different agent.</li>
     </ul>
 
     <dl id="pair-details" hidden>
@@ -55,15 +41,12 @@ import Page from '../layouts/Page.astro';
         <dd><code id="endorsement-cid-value"></code></dd>
       </div>
     </dl>
-  </section>
 
-  <noscript>
-    <p>
-      <strong>JavaScript is disabled.</strong> This browser view cannot fetch the current
-      result. Request this same URL with an <code>Accept: application/json</code> header
-      to read the check as JSON instead.
+    <p class="pair-note">
+      For JSON, request this URL with <code>Accept: application/json</code>.<br />{' '}
+      This check trusts the principal's PDS. <a href="/#verification">Verify independently</a>.
     </p>
-  </noscript>
+  </section>
 
   <script>
     interface Endorsement {
@@ -139,20 +122,20 @@ import Page from '../layouts/Page.astro';
 
     function showCannotCheck(reason: string) {
       finishLoading();
-      resultTitle.textContent = 'Cannot check this pair';
+      resultTitle.textContent = 'Couldn’t check';
       resultSummary.hidden = true;
       issues.hidden = true;
       details.hidden = true;
       endorsementUriRow.hidden = true;
       endorsementCidRow.hidden = true;
-      errorMessage.textContent = `Cannot check this pair. ${reason}`;
+      errorMessage.textContent = reason;
       errorMessage.hidden = false;
     }
 
     function showResult(result: PairCheck) {
       finishLoading();
       errorMessage.hidden = true;
-      resultSummary.hidden = false;
+      resultSummary.hidden = !result.confirmed;
       details.hidden = false;
 
       // JSON values are inserted as text, never as markup or link destinations.
@@ -170,10 +153,10 @@ import Page from '../layouts/Page.astro';
         }
       }
 
-      resultTitle.textContent = result.confirmed ? 'Pair confirmed' : 'Pair not confirmed';
+      resultTitle.textContent = result.confirmed ? 'Confirmed' : 'Not confirmed';
       resultSummary.textContent = result.confirmed
-        ? 'The agent declares this principal, and the principal endorses the agent.'
-        : 'This relationship is not confirmed. The missing or invalid evidence is listed below.';
+        ? 'The agent declared this principal, and the principal endorsed the agent.'
+        : '';
 
       issues.hidden = result.confirmed;
       missingDeclaration.hidden = result.declared;
@@ -187,9 +170,9 @@ import Page from '../layouts/Page.astro';
 
     async function checkPair() {
       pairResult.setAttribute('aria-busy', 'true');
-      resultTitle.textContent = 'Checking this pair';
-      resultSummary.textContent = 'Fetching the current declaration and endorsement check…';
-      resultSummary.hidden = false;
+      resultTitle.textContent = 'Checking…';
+      resultSummary.textContent = '';
+      resultSummary.hidden = true;
       errorMessage.hidden = true;
       issues.hidden = true;
       details.hidden = true;
@@ -202,16 +185,16 @@ import Page from '../layouts/Page.astro';
           cache: 'no-store',
         });
       } catch {
-        showCannotCheck('A network error prevented the check. Try again later.');
+        showCannotCheck('The request failed. Try again.');
         return;
       }
 
       if (response.status === 503) {
-        showCannotCheck('The checking service is temporarily unavailable. Try again later.');
+        showCannotCheck('The service is unavailable. Try again.');
         return;
       }
       if (response.status !== 200) {
-        showCannotCheck(`The checking service returned HTTP ${response.status}; no result is available.`);
+        showCannotCheck(`The service returned HTTP ${response.status}.`);
         return;
       }
 
@@ -219,13 +202,13 @@ import Page from '../layouts/Page.astro';
       try {
         body = await response.json();
       } catch {
-        showCannotCheck('The checking service returned an invalid JSON response.');
+        showCannotCheck('The service returned invalid JSON.');
         return;
       }
 
       const result = parsePairCheck(body);
       if (!result || (result.confirmed && (!result.declared || !result.endorsement))) {
-        showCannotCheck('The checking service returned an inconsistent or invalid result.');
+        showCannotCheck('The service returned an invalid result.');
         return;
       }
 
@@ -241,6 +224,15 @@ import Page from '../layouts/Page.astro';
     }
 
     #pair-result {
+      margin-top: 24px;
+    }
+
+    #pair-result h2 {
+      margin-top: 0;
+    }
+
+    .pair-note {
+      color: var(--muted);
       margin-top: 32px;
     }
 
