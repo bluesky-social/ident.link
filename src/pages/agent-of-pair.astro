@@ -1,0 +1,301 @@
+---
+import Page from '../layouts/Page.astro';
+---
+
+<Page
+  title="Agent–principal check — ident.link"
+  description="Check an agent's declaration and a principal's endorsement."
+>
+  <h1 id="agent-principal-check">Agent–principal check</h1>
+
+  <section id="pair-result" aria-labelledby="pair-result-title" aria-busy="false">
+    <h2><span id="pair-result-title">Result</span></h2>
+    <p id="pair-result-summary">JavaScript is required to show the result.</p>
+    <p id="pair-error" role="alert" hidden></p>
+
+    <ul id="pair-issues" hidden>
+      <li id="missing-declaration" hidden>The agent hasn't declared this principal.</li>
+      <li id="missing-endorsement" hidden>The principal hasn't endorsed this agent.</li>
+      <li id="invalid-endorsement" hidden>The endorsement is invalid or names a different agent.</li>
+    </ul>
+
+    <dl id="pair-details" hidden>
+      <div>
+        <dt>agent</dt>
+        <dd><code id="pair-agent"></code></dd>
+      </div>
+      <div>
+        <dt>principal</dt>
+        <dd><code id="pair-principal"></code></dd>
+      </div>
+      <div>
+        <dt>checked at</dt>
+        <dd><code id="pair-checked-at"></code></dd>
+      </div>
+      <div id="endorsement-uri-row" hidden>
+        <dt>endorsement URI</dt>
+        <dd><code id="endorsement-uri-value"></code></dd>
+      </div>
+      <div id="endorsement-cid-row" hidden>
+        <dt>endorsement CID</dt>
+        <dd><code id="endorsement-cid-value"></code></dd>
+      </div>
+    </dl>
+
+    <p class="pair-note">
+      For JSON, request this URL with <code>Accept: application/json</code>.<br />{' '}
+      This check trusts the principal's PDS. <a href="/#verification">Verify independently</a>.
+    </p>
+  </section>
+  <p id="pair-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <script>
+    interface Endorsement {
+      uri: string;
+      cid?: string;
+    }
+
+    interface PairCheck {
+      principal: string;
+      agent: string;
+      confirmed: boolean;
+      declared: boolean;
+      endorsement: Endorsement | null;
+      checkedAt: string;
+    }
+
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null;
+
+    function parsePairCheck(value: unknown): PairCheck | null {
+      if (
+        !isRecord(value) ||
+        typeof value.principal !== 'string' ||
+        typeof value.agent !== 'string' ||
+        typeof value.confirmed !== 'boolean' ||
+        typeof value.declared !== 'boolean' ||
+        typeof value.checkedAt !== 'string' ||
+        value.endorsement === undefined
+      ) {
+        return null;
+      }
+
+      let endorsement: Endorsement | null = null;
+      if (value.endorsement !== null) {
+        if (
+          !isRecord(value.endorsement) ||
+          typeof value.endorsement.uri !== 'string' ||
+          (value.endorsement.cid !== undefined && typeof value.endorsement.cid !== 'string')
+        ) {
+          return null;
+        }
+        endorsement = { uri: value.endorsement.uri };
+        if (typeof value.endorsement.cid === 'string') {
+          endorsement.cid = value.endorsement.cid;
+        }
+      }
+
+      return {
+        principal: value.principal,
+        agent: value.agent,
+        confirmed: value.confirmed,
+        declared: value.declared,
+        endorsement,
+        checkedAt: value.checkedAt,
+      };
+    }
+
+    const pairResult = document.getElementById('pair-result')!;
+    const resultTitle = document.getElementById('pair-result-title')!;
+    const resultSummary = document.getElementById('pair-result-summary')!;
+    const announcement = document.getElementById('pair-announcement')!;
+    const errorMessage = document.getElementById('pair-error')!;
+    const issues = document.getElementById('pair-issues')!;
+    const missingDeclaration = document.getElementById('missing-declaration')!;
+    const missingEndorsement = document.getElementById('missing-endorsement')!;
+    const invalidEndorsement = document.getElementById('invalid-endorsement')!;
+    const details = document.getElementById('pair-details')!;
+    const endorsementUriRow = document.getElementById('endorsement-uri-row')!;
+    const endorsementCidRow = document.getElementById('endorsement-cid-row')!;
+
+    function finishLoading() {
+      pairResult.setAttribute('aria-busy', 'false');
+    }
+
+    function showCannotCheck(reason: string) {
+      finishLoading();
+      resultTitle.textContent = 'Couldn’t check';
+      announcement.textContent = '';
+      resultSummary.hidden = true;
+      issues.hidden = true;
+      details.hidden = true;
+      endorsementUriRow.hidden = true;
+      endorsementCidRow.hidden = true;
+      errorMessage.textContent = reason;
+      errorMessage.hidden = false;
+    }
+
+    function showResult(result: PairCheck) {
+      finishLoading();
+      errorMessage.hidden = true;
+      resultSummary.hidden = !result.confirmed;
+      details.hidden = false;
+
+      // JSON values are inserted as text, never as markup or link destinations.
+      document.getElementById('pair-agent')!.textContent = result.agent;
+      document.getElementById('pair-principal')!.textContent = result.principal;
+      document.getElementById('pair-checked-at')!.textContent = result.checkedAt;
+
+      const hasEndorsement = result.endorsement !== null;
+      endorsementUriRow.hidden = !hasEndorsement;
+      endorsementCidRow.hidden = typeof result.endorsement?.cid !== 'string';
+      if (result.endorsement) {
+        document.getElementById('endorsement-uri-value')!.textContent = result.endorsement.uri;
+        if (result.endorsement.cid !== undefined) {
+          document.getElementById('endorsement-cid-value')!.textContent = result.endorsement.cid;
+        }
+      }
+
+      resultTitle.textContent = result.confirmed ? 'Confirmed' : 'Not confirmed';
+      resultSummary.textContent = result.confirmed
+        ? 'The agent declared this principal, and the principal endorsed the agent.'
+        : '';
+
+      issues.hidden = result.confirmed;
+      missingDeclaration.hidden = result.declared;
+      missingEndorsement.hidden = hasEndorsement;
+      invalidEndorsement.hidden = !(
+        !result.confirmed &&
+        result.declared &&
+        hasEndorsement
+      );
+
+      const explanation = result.confirmed
+        ? resultSummary.textContent
+        : [missingDeclaration, missingEndorsement, invalidEndorsement]
+            .filter((item) => !item.hidden)
+            .map((item) => item.textContent?.trim())
+            .filter(Boolean)
+            .join(' ');
+      announcement.textContent = `${resultTitle.textContent}. ${explanation}`;
+    }
+
+    async function checkPair() {
+      pairResult.setAttribute('aria-busy', 'true');
+      resultTitle.textContent = 'Checking…';
+      announcement.textContent = 'Checking…';
+      resultSummary.textContent = '';
+      resultSummary.hidden = true;
+      errorMessage.hidden = true;
+      issues.hidden = true;
+      details.hidden = true;
+
+      let response: Response;
+      try {
+        response = await fetch(window.location.pathname, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+        });
+      } catch {
+        showCannotCheck('The request failed. Try again.');
+        return;
+      }
+
+      if (response.status === 503) {
+        showCannotCheck('The service is unavailable. Try again.');
+        return;
+      }
+      if (response.status === 404) {
+        showCannotCheck('A DID could not be resolved.');
+        return;
+      }
+      if (response.status !== 200) {
+        showCannotCheck(`The service returned HTTP ${response.status}.`);
+        return;
+      }
+
+      let body: unknown;
+      try {
+        body = await response.json();
+      } catch {
+        showCannotCheck('The service returned invalid JSON.');
+        return;
+      }
+
+      const result = parsePairCheck(body);
+      if (!result || (result.confirmed && (!result.declared || !result.endorsement))) {
+        showCannotCheck('The service returned an invalid result.');
+        return;
+      }
+
+      showResult(result);
+    }
+
+    void checkPair();
+  </script>
+
+  <style>
+    [hidden] {
+      display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    #pair-result {
+      margin-top: 24px;
+    }
+
+    #pair-result h2 {
+      margin-top: 0;
+    }
+
+    .pair-note {
+      color: var(--muted);
+      margin-top: 32px;
+    }
+
+    #pair-error {
+      border-left: 2px solid var(--accent);
+      padding-left: 2ch;
+    }
+
+    #pair-details {
+      margin: 24px 0 0;
+    }
+
+    #pair-details > div {
+      display: grid;
+      grid-template-columns: 18ch minmax(0, 1fr);
+      gap: 1ch;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    #pair-details dt {
+      color: var(--green);
+    }
+
+    #pair-details dd {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    @media (max-width: 500px) {
+      #pair-details > div {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+    }
+  </style>
+</Page>
