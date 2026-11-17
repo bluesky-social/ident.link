@@ -24,7 +24,7 @@ name = "atproto-identity"
 version = "0.1.0"
 source = "git+https://github.com/bluesky-social/rust-tools.git?rev=bde6a351ef83aae72284743564a07fabd04b2218#bde6a351ef83aae72284743564a07fabd04b2218"
 dependencies = [
- "egress",
+ "egress 0.1.0 (git+https://github.com/bluesky-social/rust-tools.git?rev=bde6a351ef83aae72284743564a07fabd04b2218)",
  "serde",
  "serde_json",
  "thiserror",
@@ -198,7 +198,7 @@ version = "0.1.0"
 source = "git+https://github.com/bluesky-social/rust-tools.git?rev=bde6a351ef83aae72284743564a07fabd04b2218#bde6a351ef83aae72284743564a07fabd04b2218"
 dependencies = [
  "futures-util",
- "gloo-timers",
+ "gloo-timers 0.3.0",
  "js-sys",
  "reqwest",
  "thiserror",
@@ -207,6 +207,24 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "wasm-streams 0.6.0",
+ "web-sys",
+]
+
+[[package]]
+name = "egress"
+version = "0.1.0"
+source = "git+https://github.com/bluesky-social/rust-tools.git?rev=fd9334776e24c2f62dabebcee2125b9e2f0a7167#fd9334776e24c2f62dabebcee2125b9e2f0a7167"
+dependencies = [
+ "futures-util",
+ "gloo-timers 0.4.1",
+ "js-sys",
+ "reqwest",
+ "thiserror",
+ "tokio",
+ "url",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "wasm-streams 0.7.1",
  "web-sys",
 ]
 
@@ -351,6 +369,18 @@ name = "gloo-timers"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbb143cf96099802033e0d4f4963b19fd2e0b728bcf076cd9cf7f6634f092994"
+dependencies = [
+ "futures-channel",
+ "futures-core",
+ "js-sys",
+ "wasm-bindgen",
+]
+
+[[package]]
+name = "gloo-timers"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a4460540da666acdb5722b2a62ac47d18f627fcfc0c728d04dc7226b3f6d40a7"
 dependencies = [
  "futures-channel",
  "futures-core",
@@ -549,7 +579,7 @@ name = "ident-link-worker"
 version = "0.1.0"
 dependencies = [
  "atproto-identity",
- "egress",
+ "egress 0.1.0 (git+https://github.com/bluesky-social/rust-tools.git?rev=fd9334776e24c2f62dabebcee2125b9e2f0a7167)",
  "futures",
  "js-sys",
  "percent-encoding",
