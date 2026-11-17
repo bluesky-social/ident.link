@@ -8,7 +8,7 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-atproto-identity = { git = "https://github.com/bluesky-social/rust-tools.git", rev = "bde6a351ef83aae72284743564a07fabd04b2218" }
+atproto-identity = { git = "https://github.com/bluesky-social/rust-tools.git", rev = "fd9334776e24c2f62dabebcee2125b9e2f0a7167" }
 egress = { git = "https://github.com/bluesky-social/rust-tools.git", rev = "bde6a351ef83aae72284743564a07fabd04b2218" }
 futures = "0.3"
 percent-encoding = "2"
